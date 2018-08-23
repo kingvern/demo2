@@ -31,7 +31,7 @@ export default class MainPage extends Component {
           <View style={{ marginBottom: 80 }}>
             <Button
               style={{ backgroundColor: "#000", alignSelf: "center" }}
-              onPress={() => this.props.navigation.navigate("NewWallet")}
+              onPress={() => this.props.navigation.navigate("NewWord")}
             >
               <Text>新建钱包</Text>
             </Button>
