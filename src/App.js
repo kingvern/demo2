@@ -8,6 +8,8 @@ import NewWallet from "./screens/NewWallet";
 import MyWallet from "./screens/MyWallet";
 import NewWord from "./screens/NewWord";
 import CertWord from "./screens/CertWord";
+import PreBackup from "./screens/PreBackup";
+import Backup from "./screens/Backup";
 
 const AppNavigator = StackNavigator(
   {
@@ -16,6 +18,8 @@ const AppNavigator = StackNavigator(
     NewWallet: { screen: NewWallet },
     MyWallet: { screen: MyWallet },
     NewWord: { screen: NewWord },
+    PreBackup: { screen: PreBackup },
+    Backup: { screen: Backup },
     CertWord: { screen: CertWord }
   },
   {

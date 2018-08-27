@@ -2,6 +2,7 @@ var ethers = require('ethers');
 
 
 import React, { Component } from "react";
+import { AsyncStorage } from "react-native";
 import {
   Container,
   Header,
@@ -27,8 +28,32 @@ export default class ImportWallet extends Component {
       balance: -1,
       transactionCount: -1,
       to: '0x486c14c72bd37ead125c37d9d624118946d18a36',
-      isOne: true
+      pageIndex: 0
     };
+  }
+
+  ImportWallet(){
+    { 
+      if(this.state.pageIndex==0){
+      var mnemonic = this.state.mnemonic;
+      var wallet =  ethers.Wallet.fromMnemonic(mnemonic);
+      this.setState({address:wallet.address,wallet:wallet});
+      }else{
+      var privateKey = this.state.privateKey;
+      var wallet = new ethers.Wallet(privateKey);
+      this.setState({address:wallet.address,wallet:wallet});
+      }
+      alert(wallet.address);
+      this.props.navigation.navigate("MyWallet", {wallet:wallet})
+    }
+  }
+
+  afterLogin(data){
+    data = JSON.stringify(data);
+    AsyncStorage.setItem('data',data).then(
+      (data)=>
+      console.log(data)
+    )
   }
 
   render() {
@@ -48,7 +73,7 @@ export default class ImportWallet extends Component {
         </Header>
 
         <Content padder>
-          <Tabs initialPage={0} onChangeTab={()=>{this.setState({isOne:!this.state.isOne})}}> 
+          <Tabs onChangeTab={(a)=>{console.log(a.i);this.setState({pageIndex:a.i})}}> 
             <Tab heading="助记词" >
             <Textarea rowSpan={5} bordered placeholder="输入助记词，按空格分隔" 
             onChangeText={(mnemonic) => this.setState({mnemonic})}
@@ -65,17 +90,26 @@ export default class ImportWallet extends Component {
           <Button full dark style={{ marginTop:20}}
           onPress={()=>
             { 
-              if(!this.state.isOne){
+              if(this.state.pageIndex == 0){
               var mnemonic = this.state.mnemonic;
               var wallet =  ethers.Wallet.fromMnemonic(mnemonic);
               this.setState({address:wallet.address,wallet:wallet});
+              data={
+                mnemonic:this.state.mnemonic,
+                address:wallet.address
+              }
               }else{
               var privateKey = this.state.privateKey;
               var wallet = new ethers.Wallet(privateKey);
               this.setState({address:wallet.address,wallet:wallet});
+              data={
+                privateKey:this.state.privateKey,
+                address:wallet.address
               }
-              alert(wallet.address);
-              this.props.navigation.navigate("MyWallet", {address:wallet.address,wallet:wallet})
+              }
+              
+              this.afterLogin(data);
+              this.props.navigation.navigate("MyWallet", {wallet:wallet,address:wallet.address})
             }}>
             <Text>确定</Text>
           </Button>

@@ -1,5 +1,6 @@
 var ethers = require('ethers');
-
+// var bip39 = require('bip39');
+var HDNode = require('ethers').HDNode;
 
 import React, { Component } from "react";
 import {
@@ -41,7 +42,7 @@ export default class NewWord extends Component {
             </Button>
           </Left>
           <Body>
-            <Title>导入钱包</Title>
+            <Title>新建钱包</Title>
           </Body>
           <Right>
           </Right>
@@ -69,12 +70,27 @@ export default class NewWord extends Component {
               var mnemonic = this.state.mnemonic;
               var wallet =  ethers.Wallet.fromMnemonic(mnemonic);
               this.setState({address:wallet.address,wallet:wallet});
+              // var masterNode = HDNode.fromMnemonic(mnemonic);
+              // console.log(masterNode)
+              var Entropy = HDNode.mnemonicToEntropy(mnemonic);
+              console.log('Entropy',Entropy)
+              var Seed = HDNode.mnemonicToSeed(mnemonic);
+              console.log('Seed',Seed)
               }else{
               var privateKey = this.state.privateKey;
-              var wallet = new ethers.Wallet(privateKey);
-              this.setState({address:wallet.address,wallet:wallet});
+              // var wallet = new ethers.Wallet(privateKey);
+              // this.setState({address:wallet.address,wallet:wallet});
+
+              // var entropy = utils.randomBytes(16);
+              // var mnemonic = HDNode.entropyToMnemonic(entropy);
+              // console.log('mnemonic',mnemonic)
+              
+              // alert(mnemonic)
+              var wallet = ethers.Wallet.createRandom(privateKey);
+              console.log("Address: " + wallet.mnemonic);
+              console.log(wallet);
               }
-              alert(wallet.address);
+              // alert(wallet.address);
 
               var password = "password123";
 
@@ -83,17 +99,18 @@ export default class NewWord extends Component {
                   console.log("Encrypting: " + parseInt(percent * 100) + "% complete");
               }
 
-              var encryptPromise = wallet.encrypt(password, callback);
+              // var encryptPromise = wallet.encrypt(password, callback);
 
-              encryptPromise.then(function(json) {
-                  // alert(json);
-                  console.log(json);
-              });
+              // encryptPromise.then(function(json) {
+              //     // alert(json);
+              //     console.log(json);
+              // });
               // this.props.navigation.navigate("MyWallet", {address:wallet.address,wallet:wallet})
             }}>
             <Text>确定</Text>
           </Button>
-          <Button onPress={()=>
+          <Button full dark style={{ marginTop:20}}
+           onPress={()=>
           {
             var HDNode = require('ethers').HDNode;
             var mnemonic = "radar blur cabbage chef fix engine embark joy scheme fiction master release";
@@ -114,6 +131,16 @@ export default class NewWord extends Component {
           }}>
             <Text>transform</Text>
           </Button>
+          {/* <Button full dark style={{ marginTop:20}}
+           onPress={()=>
+          {
+            // var mnemonic = bip39.generateMnemonic();
+            // this.setState({mnemonic:mnemonic});
+            
+
+          }}>
+            <Text>gen mnemonic</Text>
+          </Button> */}
         </Content>
       </Container>
     );
