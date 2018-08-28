@@ -6,6 +6,7 @@ import { Container, Button, H3, Text } from "native-base";
 import styles from "./styles";
 
 import { AsyncStorage } from "react-native";
+import util from '../../Util/util.js'
 
 const launchscreenBg = require("../../../assets/launchscreen-bg.png");
 const launchscreenLogo = require("../../../assets/logo-kitchen-sink.png");
@@ -16,51 +17,40 @@ export default class MainPage extends Component {
     this.state={logined:false};
   }
   componentDidMount(){
-    this._asyncAppstatus()
-    console.log(this.state.logined)
-    this.setState({logined:true},()=>console.log(this.state))
+    console.log(util.size)
+    console.log(util.size)
+    this.checkStorage()
+    // console.log(this.state.logined)
+    // this.setState({logined:true},()=>console.log(this.state))
     
-    if(this.state.logined){
-      this.props.navigation.navigate("MyWallet",{from:'MainPage',wallet:this.state.wallet,mnemonic:this.state.mnemonic,privateKey:this.state.privateKey,address:this.state.address});
-    }
+    // if(this.state.logined){
+    //   this.props.navigation.navigate("MyWallet",{from:'MainPage',wallet:this.state.wallet,mnemonic:this.state.mnemonic,privateKey:this.state.privateKey,address:this.state.address});
+    // }
   }
-  _asyncAppstatus(){
+  checkStorage(){
     AsyncStorage.getItem('data')
     .then((data)=>{
-      console.log("data:"+data)
+      console.log(data)
       if(data){
         walletData = JSON.parse(data)
-         if(walletData.address && walletData.privateKey){
-          var wallet = new ethers.Wallet(walletData.privateKey);
+        console.log(walletData)
+         if(walletData.address){
           this.setState({
             logined:true,
-            wallet: wallet,
-            privateKey:walletData.privateKey,
-            mnemonic:walletData.mnemonic,
-            address:walletData.address})
-        }else if(walletData.address && walletData.mnemonic){
-          var wallet = ethers.Wallet.fromMnemonic(walletData.mnemonic);
-          this.setState({
-            logined:true,
-            wallet: wallet,
-            privateKey:'',
-            mnemonic:walletData.mnemonic,
-            address:walletData.address})
+            walletData: walletData})
         }
-      
       }else{
         this.setState({
           logined:false})
       }
-    }).then(
-      ()=>{
+    }).then(()=>{
         if(this.state.logined){
-          this.props.navigation.navigate("MyWallet",{from:'MainPage',wallet:this.state.wallet,mnemonic:this.state.mnemonic,privateKey:this.state.privateKey,address:this.state.address});
+          console.log(this.state.walletData)
+          this.props.navigation.navigate("MyWallet",{type:'login',walletData:this.state.walletData});
         }
       }
     )
     .catch(arg=>console.log(arg));
-    console.log('start:'+this.state.logined)
     
   }
 

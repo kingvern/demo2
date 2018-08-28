@@ -1,6 +1,8 @@
 var ethers = require('ethers');
 // var bip39 = require('bip39');
 
+var CryptoJS = require("crypto-js");
+
 import React, { Component } from "react";
 import { View } from "react-native";
 import {
@@ -40,9 +42,9 @@ export default class Backup extends Component {
     this.state = { 
       wallet: this.props.navigation.state.params.wallet,
       mnemonic: this.props.navigation.state.params.wallet.mnemonic,
+      pin:this.props.navigation.state.params.pin,
+      textareaArray:[],
       textarea: '',
-      textareaArray: [],
-      // wordsItem:["radar","blur","cabbage","chef","fix","engine","embark","joy","scheme","fiction","master","release"],
       stateWord:[],
       wordState:[]
     };
@@ -62,17 +64,59 @@ export default class Backup extends Component {
   }
   componentDidMount(){
 
-    this._asyncAppstatus()
-    console.log('state:'+this.state)
+    // this._asyncAppstatus()
+    console.log(this.state)
     var mnemonic = this.state.mnemonic;
+    var pin = this.state.pin;
+    // var words = mnemonic.split(' ').sort(()=> .5 - Math.random());
     var words = mnemonic.split(' ');
     var wordState = new Array();
     words.map((item,i) => wordState[item]=true)
-    console.log(words)
     this.setState({stateWord:words ,wordState:wordState},()=>{console.log(this.state)});
-    console.log(this.state)
-    console.log(this.state.wordsItem)
+
+    //--------------------------click button => util----------------------------------------------------
+
+    var wallet = this.state.wallet;
+    wallet.provider = ethers.providers.getDefaultProvider('ropsten');
+    var balancePromise = wallet.getBalance();
+    var transactionCountPromise = wallet.getTransactionCount();
+
+    balancePromise.then((balance)=>{
+      balance = parseInt(balance);
+      this.setState({balance: balance});
+      console.log("balance:",balance)
+
+      transactionCountPromise.then((transactionCount)=>{
+        txCount = parseInt(transactionCount);
+        this.setState({txCount: txCount});
+        console.log("txCount:",txCount)
+    }).then(()=>{
+      
+      var walletData = {
+        address:wallet.address,
+        privateKeyRaw: CryptoJS.AES.encrypt(wallet.privateKey, pin).toString(),
+        mnemonicRaw: CryptoJS.AES.encrypt(wallet.mnemonic, pin).toString(),
+        balance:this.state.balance,
+        txCount:this.state.txCount
+      }
+      this.setState({walletData:walletData})
+      console.log(CryptoJS.AES.encrypt(wallet.privateKey, pin).toString())
+      console.log(walletData)
+        AsyncStorage.setItem('data',JSON.stringify(walletData))
+        console.log("AsyncStorage save success!")
+  
+    })
+
+  }).catch(arg => alert('获取余额失败！原因是'+arg));
+     //------------------------------------------------------------------------------
+
+    // this.setState({walletData:walletData})
   }
+
+  componentWillUnmount(){
+
+  }
+
   _asyncAppstatus(){
     AsyncStorage.getItem('data')
     .then((data)=>{
@@ -141,13 +185,29 @@ export default class Backup extends Component {
   _checkMnemonic(){
     console.log('textarea:'+this.state.textarea)
     console.log('mnemonic:'+this.state.mnemonic)
-    if(this.state.textarea == this.state.mnemonic)
-              // this.props.navigation.navigate("MyWallet", {address:wallet.address,wallet:wallet})
-      this.props.navigation.navigate("MyWallet", {wallet:this.state.wallet});
+    if(this.state.textarea == this.state.mnemonic){
+      // this.crypoWallet();
+      this.props.navigation.navigate("MyWallet", {walletData:this.state.walletData});}
       else
       alert("输入错误哦！")
   }
 
+  // crypoWallet(){
+  //   var walletRaw = this.state.wallet;
+  //   var pin = this.state.pin;
+  //   var mnemonic = walletRaw.mnemonic;
+  //   var privateKey = walletRaw.privateKey;
+    
+  //   mnemonicRaw = CryptoJS.AES.encrypt(mnemonic, pin);
+  //   mnemonic = CryptoJS.AES.decrypt(mnemonicRaw, pin);
+
+  //   console.log(mnemonicRaw)
+  //   console.log(mnemonicRaw)
+
+  //   this.setState({
+  //     walletRaw:walletRaw
+  //   })
+  // }
 
 
   render() {

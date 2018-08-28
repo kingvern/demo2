@@ -10,6 +10,7 @@ import NewWord from "./screens/NewWord";
 import CertWord from "./screens/CertWord";
 import PreBackup from "./screens/PreBackup";
 import Backup from "./screens/Backup";
+import PINPage from "./screens/PINPage";
 
 const AppNavigator = StackNavigator(
   {
@@ -20,7 +21,7 @@ const AppNavigator = StackNavigator(
     NewWord: { screen: NewWord },
     PreBackup: { screen: PreBackup },
     Backup: { screen: Backup },
-    CertWord: { screen: CertWord }
+    PINPage: { screen: PINPage }
   },
   {
     initialRouteName: "MainPage",

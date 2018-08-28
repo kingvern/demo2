@@ -23,8 +23,6 @@ export default class ImportWallet extends Component {
     this.state = { 
       privateKey: '0x0123456789012345678901234567890123456789012345678901234567890124',
       mnemonic: 'radar blur cabbage chef fix engine embark joy scheme fiction master release',
-      // text: 'password123',
-      // address:'0x4C42F75ceae7b0CfA9588B940553EB7008546C29',
       balance: -1,
       transactionCount: -1,
       to: '0x486c14c72bd37ead125c37d9d624118946d18a36',
@@ -33,28 +31,35 @@ export default class ImportWallet extends Component {
   }
 
   ImportWallet(){
-    { 
-      if(this.state.pageIndex==0){
+    if(this.state.pageIndex == 0){
       var mnemonic = this.state.mnemonic;
       var wallet =  ethers.Wallet.fromMnemonic(mnemonic);
       this.setState({address:wallet.address,wallet:wallet});
+      data={
+        mnemonic:this.state.mnemonic,
+        address:wallet.address
+      }
       }else{
       var privateKey = this.state.privateKey;
       var wallet = new ethers.Wallet(privateKey);
       this.setState({address:wallet.address,wallet:wallet});
+      data={
+        privateKey:this.state.privateKey,
+        address:wallet.address
       }
-      alert(wallet.address);
-      this.props.navigation.navigate("MyWallet", {wallet:wallet})
-    }
+      }
+      
+      // this.afterLogin(data);
+      this.props.navigation.navigate("PINPage", {wallet:wallet})
   }
 
-  afterLogin(data){
-    data = JSON.stringify(data);
-    AsyncStorage.setItem('data',data).then(
-      (data)=>
-      console.log(data)
-    )
-  }
+  // afterLogin(data){
+  //   data = JSON.stringify(data);
+  //   AsyncStorage.setItem('data',data).then(
+  //     (data)=>
+  //     console.log(data)
+  //   )
+  // }
 
   render() {
     return (
@@ -108,8 +113,8 @@ export default class ImportWallet extends Component {
               }
               }
               
-              this.afterLogin(data);
-              this.props.navigation.navigate("MyWallet", {wallet:wallet,address:wallet.address})
+              // this.afterLogin(data);
+              this.props.navigation.navigate("PINPage", {wallet:wallet})
             }}>
             <Text>确定</Text>
           </Button>

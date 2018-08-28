@@ -19,10 +19,18 @@ import styles from "./styles";
 export default class PreBackup extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      wallet: this.props.navigation.state.params.wallet,
-      mnemonic: this.props.navigation.state.params.wallet.mnemonic
-    };
+    if(this.props.navigation.state.params.wallet)
+      this.state = { 
+        wallet: this.props.navigation.state.params.wallet,
+        mnemonic: this.props.navigation.state.params.wallet.mnemonic,
+        pin:this.props.navigation.state.params.pin
+      };
+    else
+      this.state = {
+        walletData: this.props.navigation.state.params.walletData,
+        mnemonic: this.props.navigation.state.params.wallet.mnemonic,
+        pin:this.props.navigation.state.params.pin
+      }
   }
   componentDidMount(){
 
@@ -51,7 +59,8 @@ export default class PreBackup extends Component {
           <Button full dark style={{ marginTop:20}}
            onPress={()=>
           {
-            this.props.navigation.navigate("Backup", {wallet:this.state.wallet})
+
+            this.props.navigation.navigate("Backup", {wallet:this.state.wallet,pin:this.state.pin})
           }}>
             <Text>下一步</Text>
           </Button>
