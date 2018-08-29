@@ -6,7 +6,7 @@ import MainPage from "./screens/MainPage";
 import ImportWallet from "./screens/ImportWallet";
 import NewWallet from "./screens/NewWallet";
 import MyWallet from "./screens/MyWallet";
-import NewWord from "./screens/NewWord";
+import TestPage from "./screens/TestPage";
 import PreBackup from "./screens/PreBackup";
 import Backup from "./screens/Backup";
 import PinPage from "./screens/PinPage";
@@ -17,7 +17,7 @@ const AppNavigator = StackNavigator(
     ImportWallet: { screen: ImportWallet },
     NewWallet: { screen: NewWallet },
     MyWallet: { screen: MyWallet },
-    NewWord: { screen: NewWord },
+    TestPage: { screen: TestPage },
     PreBackup: { screen: PreBackup },
     Backup: { screen: Backup },
     PinPage: { screen: PinPage }

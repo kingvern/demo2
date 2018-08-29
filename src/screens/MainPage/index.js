@@ -13,7 +13,7 @@ const launchscreenLogo = require("../../../assets/logo-kitchen-sink.png");
 
 export default class MainPage extends Component {
   // 入口页面
-  // 判断已登录到MyWallet传出参数：wallet，pin
+  // 判断已登录转到MyWallet传出参数：wallet，pin
   constructor(props) {
     super(props);
     this.state = { logined: false };

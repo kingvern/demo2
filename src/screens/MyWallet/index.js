@@ -19,18 +19,20 @@ var CryptoJS = require("crypto-js");
 var ethers = require("ethers");
 
 var walletUtil = require("../../Util/wallet");
+var storageUtil = require("../../Util/storage");
 
 export default class MyWallet extends Component {
   // 从NewWallet或MyWallet传进参数：wallet，pin
   // 到Backup传出参数：wallet，pin
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       walletData: this.props.navigation.state.params.walletData,
       address: this.props.navigation.state.params.walletData.address,
       privateKeyRaw: this.props.navigation.state.params.walletData.privateKeyRaw,
       mnemonicRaw: this.props.navigation.state.params.walletData.mnemonicRaw,
-      balance: this.props.navigation.state.params.walletData.balance,to: "0x486c14c72bd37ead125c37d9d624118946d18a36",
+      balance: this.props.navigation.state.params.walletData.balance,
+      to: "0x486c14c72bd37ead125c37d9d624118946d18a36",
       value: "0.0001",
       ModalVisible: false,
       pin: "",
@@ -52,10 +54,8 @@ export default class MyWallet extends Component {
       balance: this.state.balance
     };
     this.setState({ walletData: walletData });
-    console.log("AsyncStorage start");
-    AsyncStorage.setItem("data", JSON.stringify(walletData));
-    console.log(walletData);
-    console.log("AsyncStorage save success!");
+
+    storageUtil.setData(walletData);
   }
 
   render() {
@@ -82,7 +82,9 @@ export default class MyWallet extends Component {
             <Input bordered placeholder="请输入转账金额" value={this.state.value.toString()}
                    onChangeText={(value) => this.setState({ value })}/>
           </Item>
-          <Button full dark style={{ marginTop: 20 }} onPress={() => { this.setState({ ModalVisible: true, pin: "", task: "tx" }); }}>
+          <Button full dark style={{ marginTop: 20 }} onPress={() => {
+            this.setState({ ModalVisible: true, pin: "", task: "tx" });
+          }}>
             <Text>转账</Text>
           </Button>
           <Text style={{ padding: 10, fontSize: 11 }}>
@@ -94,7 +96,8 @@ export default class MyWallet extends Component {
           <Text style={{ padding: 10, fontSize: 11 }}>
             交易哈希: {this.state.txHash}
           </Text>
-          <Button full dark style={{ marginTop: 20 }} onPress={() => { this.setState({ ModalVisible: true, pin: "", task: "backup" });
+          <Button full dark style={{ marginTop: 20 }} onPress={() => {
+            this.setState({ ModalVisible: true, pin: "", task: "backup" });
           }}><Text>备份钱包</Text></Button>
         </Content>
 
@@ -115,7 +118,7 @@ export default class MyWallet extends Component {
                        onChangeText={pin => this.setState({ pin: pin })}/>
               </Item>
               <Button full dark style={{ marginTop: 20 }} onPress={() => {
-                var wallet = walletUtil.checkPIN(this.state.walletData, this.state.pin);
+                var wallet = walletUtil.checkPin(this.state.walletData, this.state.pin);
                 console.log(wallet);
                 if (wallet) {
                   var toastText = "验证成功";

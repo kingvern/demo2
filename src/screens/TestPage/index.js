@@ -18,6 +18,7 @@ import {
 import styles from "./styles";
 
 export default class NewWord extends Component {
+  //测试页面，不用管
   constructor(props) {
     super(props);
     this.state = {

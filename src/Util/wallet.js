@@ -49,9 +49,9 @@ module.exports = {
   },
 
   /*
-  通过私钥检查钱包的正确性
+  通过助记词检查钱包的正确性
   */
-  checkPIN(walletData, pin) {
+  checkPin(walletData, pin) {
     console.log("mnemonicRaw", walletData.mnemonicRaw);
     console.log("pin", pin);
     var bytes = CryptoJS.AES.decrypt(walletData.mnemonicRaw, pin);

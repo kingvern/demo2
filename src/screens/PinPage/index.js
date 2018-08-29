@@ -19,22 +19,36 @@ import { AsyncStorage } from "react-native";
 
 var CryptoJS = require("crypto-js");
 var walletUtil = require("../../Util/wallet");
+var storageUtil = require("../../Util/storage");
 
 export default class PinPage extends Component {
-  // 从NewWallet或MyWallet传进参数：wallet，pin
-  // 到Backup传出参数：wallet，pin
+  // 从ImportWallet传进参数：wallet
+  // 到MyWallet传出参数：walletData
   constructor(props) {
     super(props);
     this.state = {
       wallet: this.props.navigation.state.params.wallet,
-      pin: "",
-      goto: "MyWallet"
+      pin: ""
     };
-    console.log(this.props.navigation.state.params.wallet);
   }
 
-  componentDidMount() {
+  _sendData() {
+    var pin = this.state.pin;
+    var wallet = this.state.wallet;
+    console.log(wallet);
+    wallet.provider = ethers.providers.getDefaultProvider("ropsten");
+    var balancePromise = wallet.getBalance();
+    balancePromise.then((balance) => {
+      balance = parseInt(balance) / 1000000000000000000;
+      this.setState({ balance: balance });
+      console.log("balance:", balance);
 
+      var walletData = walletUtil.saveWalletData(this.state);
+      this.setState({ walletData: walletData });
+      console.log(walletData);
+      storageUtil.setData(walletData);
+      this.props.navigation.navigate("MyWallet", { walletData: this.state.walletData });
+    }).catch(arg => alert("获取余额失败！原因是" + arg));
   }
 
   render() {
@@ -58,29 +72,10 @@ export default class PinPage extends Component {
           <H3 style={{ color: "#000", alignSelf: "center" }}>输入PIN码</H3>
           <Text style={{ color: "#000", alignSelf: "center" }}>PIN码用于交易签名。我们不存储PIN码，无法提供找回功能，请牢记</Text>
           <Item>
-            <Input bordered placeholder="输入PIN码" onChangeText={pin => this.setState({ pin: pin })}/>
+            <Input bordered placeholder="输入PIN码" value={this.state.pin}
+                   onChangeText={(pin) => this.setState({ pin: pin })}/>
           </Item>
-          <Button full dark style={{ marginTop: 20 }} onPress={() => {
-            var pin = this.state.pin;
-            var wallet = this.state.wallet;
-            console.log(wallet);
-            wallet.provider = ethers.providers.getDefaultProvider("ropsten");
-            var balancePromise = wallet.getBalance();
-            balancePromise.then((balance) => {
-              balance = parseInt(balance)/1000000000000000000;
-              this.setState({ balance: balance });
-              console.log("balance:", balance);
-
-              var walletData = walletUtil.saveWalletData(this.state);
-              this.setState({ walletData: walletData });
-              console.log(walletData);
-              AsyncStorage.setItem("data", JSON.stringify(walletData));
-              console.log("AsyncStorage save success!");
-              this.props.navigation.navigate(this.state.goto, { walletData: this.state.walletData });
-            }).catch(arg => alert("获取余额失败！原因是" + arg));
-
-
-          }}>
+          <Button full dark style={{ marginTop: 20 }} onPress={() => this._sendData()}>
             <Text>下一步</Text>
           </Button>
         </Content>

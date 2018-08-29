@@ -1,8 +1,3 @@
-var ethers = require("ethers");
-// var bip39 = require('bip39');
-
-var CryptoJS = require("crypto-js");
-
 import React, { Component } from "react";
 import { View } from "react-native";
 import {
@@ -15,21 +10,19 @@ import {
   Left,
   Right,
   Body,
-  Text, Tab, Tabs, Label, Input, Item, Textarea
+  Text,
+  Textarea
 } from "native-base";
 
 import { AsyncStorage } from "react-native";
 
 import styles from "./styles";
 
+var ethers = require("ethers");
+var CryptoJS = require("crypto-js");
 var walletUtil = require("../../Util/wallet");
+var storageUtil = require("../../Util/storage");
 
-// words = 'radar blur cabbage chef fix engine embark joy scheme fiction master release'.split(' ');
-
-
-// export default class wordButton extends Component {
-
-// }
 
 Array.prototype.remove = function(val) {
   var index = this.indexOf(val);
@@ -39,6 +32,10 @@ Array.prototype.remove = function(val) {
 };
 
 export default class Backup extends Component {
+  // 从preBackup接受参数：wallet，pin
+  // 让用户验证助记词
+  // 加密钱包信息到walletData
+  // 到MyWallet传出参数：walletData，pin
   constructor(props) {
     super(props);
     this.state = {
@@ -51,23 +48,15 @@ export default class Backup extends Component {
       wordState: []
     };
 
-    this._checkMnemonic = this._checkMnemonic.bind(this);
-    this._asyncAppstatus = this._asyncAppstatus.bind(this);
-    // var mnemonic = this.state.mnemonic;
-    // var words = mnemonic.split(' ');
-
-    // console.log(words)
-    // this.setState({word:['words']})
-    // console.log(this.state.word)
-    // console.log(this.state.wordsItem)
-    // // words.map((word)=>console.log(word))
-
-
   }
 
   componentDidMount() {
+    this._displayWord();
+    this._setWalletData();
 
-    // this._asyncAppstatus()
+  }
+
+  _displayWord() {
     console.log(this.state);
     var mnemonic = this.state.mnemonic;
     var pin = this.state.pin;
@@ -78,109 +67,59 @@ export default class Backup extends Component {
     this.setState({ stateWord: words, wordState: wordState }, () => {
       console.log(this.state);
     });
+  }
 
-    //--------------------------click button => util----------------------------------------------------
-
+  _setWalletData() {
     var wallet = this.state.wallet;
     wallet.provider = ethers.providers.getDefaultProvider("ropsten");
     var balancePromise = wallet.getBalance();
-
     balancePromise.then((balance) => {
       balance = parseInt(balance) / 1000000000000000000;
       this.setState({ balance: balance });
       console.log("balance:", balance);
-
       var walletData = walletUtil.saveWalletData(this.state);
       this.setState({ walletData });
-      console.log(CryptoJS.AES.encrypt(wallet.privateKey, pin).toString());
-      console.log(walletData);
-      AsyncStorage.setItem("data", JSON.stringify(walletData));
-      console.log("AsyncStorage save success!");
-
-      // })
+      storageUtil.setData(walletData);
 
     }).catch(arg => alert("获取余额失败！原因是" + arg));
-    //------------------------------------------------------------------------------
-
-    // this.setState({walletData:walletData})
   }
 
-  componentWillUnmount() {
 
+  _addWord(item) {
+    var wordState = this.state.wordState;
+    var textarea = this.state.textarea;
+    var textareaArray = this.state.textareaArray;
+    textareaArray.push(item);
+    console.log(textareaArray);
+    textarea == "" ? textarea = item : textarea = textarea + " " + item;
+    textarea = textareaArray.join(" ");
+    wordState[item] = !wordState[item];
+    this.setState({
+      wordState: wordState,
+      textarea: textarea,
+      textareaArray: textareaArray
+    });
   }
 
-  _asyncAppstatus() {
-    AsyncStorage.getItem("data")
-      .then((data) => {
-        console.log(data);
-        if (data) {
-          var walletData = JSON.parse(data);
-          if (walletData && walletData.mnemonic) {
-            var wallet = ethers.Wallet.fromMnemonic(walletData.mnemonic);
-            this.setState({
-              logined: true,
-              wallet: wallet,
-              privateKey: "",
-              mnemonic: walletData.mnemonic,
-              address: walletData.address
-            });
-          }
-          console.log("mnemonic:" + this.state.mnemonic);
-          console.log(this.state);
-
-        }
-      })
-      .catch(arg => console.log(arg));
-
-
-  }
-
-  renderItem(item, i) {
-    // if(this.state.wordState[i])
-    if (this.state.wordState[item]) {
-      return (
-        <Button dark style={styles.button} onPress={() => {
-          var wordState = this.state.wordState;
-          var textarea = this.state.textarea;
-          var textareaArray = this.state.textareaArray;
-          textareaArray.push(item);
-          console.log(textareaArray);
-          textarea == "" ? textarea = item : textarea = textarea + " " + item;
-          textarea = textareaArray.join(" ");
-          wordState[item] = !wordState[item];
-          this.setState({
-            wordState: wordState,
-            textarea: textarea,
-            textareaArray: textareaArray
-          });
-        }} key={i}><Text>{item}</Text></Button>
-      );
-    } else {
-      return (
-        <Button light style={styles.button} onPress={() => {
-          var wordState = this.state.wordState;
-          var textarea = this.state.textarea;
-          var textareaArray = this.state.textareaArray;
-          textareaArray.remove(item);
-          console.log(textareaArray);
-          textarea = textarea.slice(0, -1 - item.length);
-          textarea = textareaArray.join(" ");
-          wordState[item] = !wordState[item];
-          this.setState({
-            wordState: wordState,
-            textarea: textarea,
-            textareaArray: textareaArray
-          });
-        }} key={i}><Text>{item}</Text></Button>
-      );
-    }
+  _rmWord(item) {
+    var wordState = this.state.wordState;
+    var textarea = this.state.textarea;
+    var textareaArray = this.state.textareaArray;
+    textareaArray.remove(item);
+    console.log(textareaArray);
+    textarea = textareaArray.join(" ");
+    wordState[item] = !wordState[item];
+    this.setState({
+      wordState: wordState,
+      textarea: textarea,
+      textareaArray: textareaArray
+    });
   }
 
   _checkMnemonic() {
     console.log("textarea:" + this.state.textarea);
     console.log("mnemonic:" + this.state.mnemonic);
     if (this.state.textarea == this.state.mnemonic) {
-      // this.crypoWallet();
       this.props.navigation.navigate("MyWallet", { walletData: this.state.walletData });
     }
     else {
@@ -188,23 +127,15 @@ export default class Backup extends Component {
     }
   }
 
-  // crypoWallet(){
-  //   var walletRaw = this.state.wallet;
-  //   var pin = this.state.pin;
-  //   var mnemonic = walletRaw.mnemonic;
-  //   var privateKey = walletRaw.privateKey;
+  renderItem(item, i) {
+    return (
+      <Button dark={this.state.wordState[item]} light={!this.state.wordState[item]} style={styles.button}
+              onPress={() => {
+                this.state.wordState[item] ? this._addWord(item) : this._rmWord(item);
+              }} key={i}><Text>{item}</Text></Button>
+    );
 
-  //   mnemonicRaw = CryptoJS.AES.encrypt(mnemonic, pin);
-  //   mnemonic = CryptoJS.AES.decrypt(mnemonicRaw, pin);
-
-  //   console.log(mnemonicRaw)
-  //   console.log(mnemonicRaw)
-
-  //   this.setState({
-  //     walletRaw:walletRaw
-  //   })
-  // }
-
+  }
 
   render() {
     return (
@@ -226,8 +157,6 @@ export default class Backup extends Component {
             <Textarea rowSpan={5} bordered placeholder="输入助记词，按空格分隔；或者直接点击助记词按钮输入"
                       value={this.state.textarea}
                       onChangeText={(textarea) => this.setState({ textarea })}/>
-
-
           <Content padder>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap" }}
@@ -235,11 +164,7 @@ export default class Backup extends Component {
               {this.state.stateWord.map((item, i) => this.renderItem(item, i))}
             </View>
           </Content>
-          <Button full dark style={{ marginTop: 20 }}
-                  onPress={
-                    this._checkMnemonic
-                  }
-          >
+          <Button full dark style={{ marginTop: 20 }} onPress={() => this._checkMnemonic()}>
             <Text>确定</Text>
           </Button>
 

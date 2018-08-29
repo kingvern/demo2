@@ -1,8 +1,4 @@
-var ethers = require("ethers");
-
-
 import React, { Component } from "react";
-import { AsyncStorage } from "react-native";
 import {
   Container,
   Header,
@@ -13,11 +9,16 @@ import {
   Left,
   Right,
   Body,
-  Text, H3, Textarea
+  Text,
+  H3,
+  Textarea
 } from "native-base";
 import styles from "./styles";
 
+var ethers = require("ethers");
+
 export default class ImportWallet extends Component {
+  //传导入的钱包到PinPage设置Pin码
   constructor(props) {
     super(props);
     this.state = {
@@ -51,7 +52,6 @@ export default class ImportWallet extends Component {
                     var mnemonic = this.state.mnemonic;
                     var wallet = ethers.Wallet.fromMnemonic(mnemonic);
                     this.setState({ wallet: wallet });
-                    // this.afterLogin(data);
                     this.props.navigation.navigate("PinPage", { wallet: wallet });
                   }}>
             <Text>确定</Text>
