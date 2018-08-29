@@ -7,10 +7,9 @@ import ImportWallet from "./screens/ImportWallet";
 import NewWallet from "./screens/NewWallet";
 import MyWallet from "./screens/MyWallet";
 import NewWord from "./screens/NewWord";
-import CertWord from "./screens/CertWord";
 import PreBackup from "./screens/PreBackup";
 import Backup from "./screens/Backup";
-import PINPage from "./screens/PINPage";
+import PinPage from "./screens/PinPage";
 
 const AppNavigator = StackNavigator(
   {
@@ -21,7 +20,7 @@ const AppNavigator = StackNavigator(
     NewWord: { screen: NewWord },
     PreBackup: { screen: PreBackup },
     Backup: { screen: Backup },
-    PINPage: { screen: PINPage }
+    PinPage: { screen: PinPage }
   },
   {
     initialRouteName: "MainPage",
